@@ -1,11 +1,9 @@
 name: CI/CD Pipeline
 
 on:
-  # Trigger the workflow on any push to the main branch
   push:
     branches:
       - main
-  
 
 jobs:
   Test:
@@ -38,12 +36,17 @@ jobs:
           docker build -t mooaz/my-node-app:${{ github.run_number }} .
           docker push mooaz/my-node-app:${{ github.run_number }}
 
+      - name: Prepare SSH Known Hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to Kind Cluster
+      - name: Deploy to Kubernetes Cluster
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
           export KUBECONFIG=$HOME/.kube/config

@@ -36,20 +36,12 @@ jobs:
           docker build -t mooaz/my-node-app:${{ github.run_number }} .
           docker push mooaz/my-node-app:${{ github.run_number }}
 
-      - name: Prepare SSH Known Hosts
+      - name: Set up Kubeconfig
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
 
       - name: Deploy to Kubernetes Cluster
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }} << 'EOF'
-          export KUBECONFIG=$HOME/.kube/config
           kubectl set image deployment/nodejs-app nodejs-app=mooaz/my-node-app:${{ github.run_number }}
           kubectl rollout status deployment/nodejs-app
-          EOF

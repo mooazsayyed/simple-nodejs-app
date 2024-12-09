@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - main
-  # Allow manual trigger of the workflow
-  workflow_dispatch:
+  
 
 jobs:
   Test:
@@ -42,7 +41,7 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.4
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY | fromBase64 }}
 
       - name: Deploy to Kind Cluster
         run: |

@@ -1,29 +1,29 @@
 # Stage 1: Build Stage
-FROM node:16-alpine AS builder
+FROM node:16-alpine AS build
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package files first to leverage Docker's caching mechanism
+# Copy package.json and package-lock.json first to leverage Docker's cache
 COPY package*.json ./
 
-# Install production dependencies only
+# Install dependencies (including dev dependencies like mocha and chai-http)
 RUN npm install --production
 
 # Copy the rest of the application code
 COPY . .
 
-# Stage 2: Production Image
+# Stage 2: Production Stage
 FROM node:16-alpine
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy only the necessary files from the build stage
-COPY --from=builder /app .
+# Copy only necessary files (production dependencies and app code)
+COPY --from=build /app /app
 
-# Expose the application port
+# Expose the port that the app will run on
 EXPOSE 3000
 
 # Start the application
-ENTRYPOINT ["npm", "start"]
+CMD ["npm", "start"]

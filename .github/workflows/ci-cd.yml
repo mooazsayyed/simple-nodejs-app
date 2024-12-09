@@ -37,6 +37,9 @@ jobs:
         run: |
           docker build -t mooaz/my-node-app:${{ github.run_number }} .
           docker push mooaz/my-node-app:${{ github.run_number }}
+      - name: Add Host to Known Hosts
+        run:  ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts
+
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.4
